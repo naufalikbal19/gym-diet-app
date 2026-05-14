@@ -4,7 +4,16 @@ import { supabase } from '../lib/supabase'
 import { ArrowLeft, Scale, ChevronRight } from 'lucide-react'
 
 // ---------- reusable field ----------
-function F({ label, name, unit, placeholder, form, set, step = '0.1', min, max, type = 'number' }) {
+// Pakai type="text" + inputMode="decimal" agar cursor tidak loncat saat ketik angka desimal
+function F({ label, name, unit, placeholder, form, set }) {
+  function handleChange(e) {
+    const raw = e.target.value
+    // Izinkan: angka, titik desimal, tanda minus (untuk nilai negatif seperti weight control)
+    if (raw === '' || raw === '-' || /^-?\d*\.?\d*$/.test(raw)) {
+      set(prev => ({ ...prev, [name]: raw }))
+    }
+  }
+
   return (
     <div>
       <label className="label">
@@ -13,13 +22,12 @@ function F({ label, name, unit, placeholder, form, set, step = '0.1', min, max, 
       </label>
       <input
         className="input"
-        type={type}
-        step={step}
-        min={min}
-        max={max}
+        type="text"
+        inputMode="decimal"
         placeholder={placeholder ?? ''}
         value={form[name] ?? ''}
-        onChange={e => set(prev => ({ ...prev, [name]: e.target.value }))}
+        onChange={handleChange}
+        autoComplete="off"
       />
     </div>
   )
