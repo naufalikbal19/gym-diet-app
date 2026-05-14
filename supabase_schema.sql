@@ -1,6 +1,7 @@
 -- ============================================================
--- GymTrack Pro — Supabase Schema
--- Jalankan di: Supabase Dashboard > SQL Editor
+-- GymTrack Pro — Schema LENGKAP (fresh install)
+-- Gunakan file ini kalau belum ada tabel sama sekali
+-- Kalau tabel sudah ada → gunakan supabase_migration.sql
 -- ============================================================
 
 -- Tabel klien
@@ -18,56 +19,84 @@ CREATE TABLE IF NOT EXISTS clients (
 
 -- Tabel data pengukuran BodyIn
 CREATE TABLE IF NOT EXISTS bodyin_measurements (
-  id                          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at                  TIMESTAMPTZ DEFAULT now(),
-  client_id                   UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
-  measured_at                 DATE NOT NULL DEFAULT CURRENT_DATE,
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at  TIMESTAMPTZ DEFAULT now(),
+  client_id   UUID REFERENCES clients(id) ON DELETE CASCADE NOT NULL,
+  measured_at DATE NOT NULL DEFAULT CURRENT_DATE,
 
-  -- Data utama dari mesin BodyIn
-  weight_kg                   NUMERIC(5,2),       -- Berat badan (kg)
-  bmi                         NUMERIC(4,1),       -- Body Mass Index
-  body_fat_percentage         NUMERIC(4,1),       -- Persentase lemak tubuh (%)
-  muscle_mass_kg              NUMERIC(5,2),       -- Massa otot (kg)
+  -- Compositions — Body Breakdown (kg)
+  weight_kg               NUMERIC(5,2),
+  water_total_kg          NUMERIC(5,2),
+  body_fat_kg             NUMERIC(5,2),
+  protein_kg              NUMERIC(4,2),
+  muscle_kg               NUMERIC(5,2),
 
-  -- Data tambahan
-  bone_mass_kg                NUMERIC(4,2),       -- Massa tulang (kg)
-  body_water_percentage       NUMERIC(4,1),       -- Kadar air tubuh (%)
-  visceral_fat                NUMERIC(4,1),       -- Level lemak visceral (1-30)
-  metabolic_age               INTEGER,            -- Usia metabolik
-  bmr_kcal                    INTEGER,            -- Basal Metabolic Rate (kcal/hari)
-  protein_percentage          NUMERIC(4,1),       -- Persentase protein (%)
-  subcutaneous_fat_percentage NUMERIC(4,1)        -- Lemak subkutan (%)
+  -- Compositions — Persentase & Indeks
+  bmi                     NUMERIC(4,1),
+  fat_rate                NUMERIC(4,1),
+  whr                     NUMERIC(4,2),
+  vfal                    NUMERIC(4,1),
+  obesity_percentage      NUMERIC(5,1),
+  bmr_kcal                INTEGER,
+  subskin_fat_rate        NUMERIC(4,1),
+  muscle_rate             NUMERIC(4,1),
+
+  -- Extended Compositions
+  skeletal_muscle_kg      NUMERIC(5,2),
+  mineral_kg              NUMERIC(4,2),
+  bone_kg                 NUMERIC(4,2),
+  fat_free_mass_kg        NUMERIC(5,2),
+  water_ecw_kg            NUMERIC(5,2),
+  water_icw_kg            NUMERIC(5,2),
+  cell_kg                 NUMERIC(5,2),
+  subskin_fat_kg          NUMERIC(5,2),
+
+  -- Suggestions
+  body_type               TEXT,
+  dci_kcal                INTEGER,
+  score                   INTEGER,
+  body_age                INTEGER,
+  ideal_weight_kg         NUMERIC(5,2),
+  weight_control_kg       NUMERIC(5,2),
+  fat_control_kg          NUMERIC(5,2),
+  muscle_control_kg       NUMERIC(5,2),
+
+  -- Segments — Fat (kg)
+  right_arm_fat_kg        NUMERIC(4,2),
+  left_arm_fat_kg         NUMERIC(4,2),
+  trunk_fat_kg            NUMERIC(5,2),
+  right_leg_fat_kg        NUMERIC(4,2),
+  left_leg_fat_kg         NUMERIC(4,2),
+
+  -- Segments — Muscle (kg)
+  trunk_muscle_kg         NUMERIC(5,2),
+  right_arm_muscle_kg     NUMERIC(4,2),
+  left_arm_muscle_kg      NUMERIC(4,2),
+  right_leg_muscle_kg     NUMERIC(4,2),
+  left_leg_muscle_kg      NUMERIC(4,2),
+
+  -- Segments — Fat Rate (%)
+  right_arm_fat_rate      NUMERIC(6,1),
+  left_arm_fat_rate       NUMERIC(6,1),
+  trunk_fat_rate          NUMERIC(6,1),
+  right_leg_fat_rate      NUMERIC(6,1),
+  left_leg_fat_rate       NUMERIC(6,1)
 );
 
--- Index untuk query yang sering dipakai
 CREATE INDEX IF NOT EXISTS idx_measurements_client_date
   ON bodyin_measurements (client_id, measured_at DESC);
 
--- ============================================================
--- Row Level Security (RLS) — hanya user yang login bisa akses
--- ============================================================
-
+-- RLS
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bodyin_measurements ENABLE ROW LEVEL SECURITY;
 
--- Policy: semua authenticated user bisa CRUD (untuk admin gym)
+DROP POLICY IF EXISTS "Authenticated users can manage clients" ON clients;
+DROP POLICY IF EXISTS "Authenticated users can manage measurements" ON bodyin_measurements;
+
 CREATE POLICY "Authenticated users can manage clients"
-  ON clients FOR ALL
-  TO authenticated
-  USING (true)
-  WITH CHECK (true);
+  ON clients FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
 
 CREATE POLICY "Authenticated users can manage measurements"
-  ON bodyin_measurements FOR ALL
-  TO authenticated
-  USING (true)
-  WITH CHECK (true);
-
--- ============================================================
--- Data contoh (opsional — hapus jika tidak perlu)
--- ============================================================
-
--- INSERT INTO clients (name, phone, gender, age, height_cm, goal) VALUES
---   ('Budi Santoso', '081234567890', 'male', 28, 172.0, 'cut'),
---   ('Sari Dewi', '082345678901', 'female', 25, 160.5, 'toning'),
---   ('Andi Pratama', '083456789012', 'male', 32, 175.0, 'bulk');
+  ON bodyin_measurements FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);

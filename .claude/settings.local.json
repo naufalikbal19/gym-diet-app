@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "mcp__44bbb774-95eb-429c-b982-5c3d4de45522__netlify-project-services-reader",
+      "mcp__44bbb774-95eb-429c-b982-5c3d4de45522__netlify-project-services-updater"
     ]
   }
 }
