@@ -59,6 +59,54 @@ function Tab({ label, active, onClick, index }) {
   )
 }
 
+// ---------- row of 2 ----------
+// PENTING: definisikan di LUAR komponen utama agar React tidak
+// menganggap ini tipe komponen baru setiap render → input tidak remount
+function Row({ children }) {
+  return <div className="grid grid-cols-2 gap-3">{children}</div>
+}
+
+// ---------- body map segments ----------
+// form & setForm dikirim via props, bukan closure
+function BodyMap({ title, fields, form, setForm }) {
+  return (
+    <div className="bg-gray-800/40 rounded-xl p-4 space-y-3">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{title}</p>
+      <div className="relative">
+        {/* Center trunk */}
+        <div className="flex justify-center mb-2">
+          <div className="w-52">
+            <p className="text-xs text-center text-gray-500 mb-1">Trunk</p>
+            <F name={fields.trunk} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
+          </div>
+        </div>
+        {/* Arms row */}
+        <div className="grid grid-cols-2 gap-3 mb-2">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Right Arm</p>
+            <F name={fields.rightArm} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Left Arm</p>
+            <F name={fields.leftArm} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
+          </div>
+        </div>
+        {/* Legs row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Right Leg</p>
+            <F name={fields.rightLeg} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Left Leg</p>
+            <F name={fields.leftLeg} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const TABS = ['Compositions', 'Segments', 'Suggestions', 'Extended']
 
 const EMPTY = {
@@ -138,52 +186,6 @@ export default function AddBodyinPage() {
   const p = (name, label, unit, placeholder, extra = {}) => (
     <F key={name} name={name} label={label} unit={unit} placeholder={placeholder} form={form} set={setForm} {...extra} />
   )
-
-  // Row of 2 inputs
-  function Row({ children }) {
-    return <div className="grid grid-cols-2 gap-3">{children}</div>
-  }
-
-  // 4-column grid for segments
-  function BodyMap({ title, fields }) {
-    return (
-      <div className="bg-gray-800/40 rounded-xl p-4 space-y-3">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{title}</p>
-        {/* Visual body map */}
-        <div className="relative">
-          {/* Center trunk */}
-          <div className="flex justify-center mb-2">
-            <div className="w-52">
-              <p className="text-xs text-center text-gray-500 mb-1">Trunk</p>
-              <F name={fields.trunk} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
-            </div>
-          </div>
-          {/* Arms row */}
-          <div className="grid grid-cols-2 gap-3 mb-2">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Right Arm</p>
-              <F name={fields.rightArm} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Left Arm</p>
-              <F name={fields.leftArm} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
-            </div>
-          </div>
-          {/* Legs row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Right Leg</p>
-              <F name={fields.rightLeg} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Left Leg</p>
-              <F name={fields.leftLeg} label="" unit={fields.unit} placeholder="0.0" form={form} set={setForm} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -272,6 +274,8 @@ export default function AddBodyinPage() {
 
                 <BodyMap
                   title="Fat (kg)"
+                  form={form}
+                  setForm={setForm}
                   fields={{
                     unit: 'kg',
                     trunk: 'trunk_fat_kg',
@@ -284,6 +288,8 @@ export default function AddBodyinPage() {
 
                 <BodyMap
                   title="Muscle (kg)"
+                  form={form}
+                  setForm={setForm}
                   fields={{
                     unit: 'kg',
                     trunk: 'trunk_muscle_kg',
@@ -296,6 +302,8 @@ export default function AddBodyinPage() {
 
                 <BodyMap
                   title="Fat Rate (%)"
+                  form={form}
+                  setForm={setForm}
                   fields={{
                     unit: '%',
                     trunk: 'trunk_fat_rate',
